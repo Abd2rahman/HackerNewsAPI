@@ -25,9 +25,22 @@ module.exports = {
         id: user.id
       }
       const token = TokenService.sign(payload)
+      sails.log.info(`REST request to authenticate with FB from user ${user.id}`)
       return res.json({ token })
     } catch (err) {
       if (err.response.error.code === 190) return res.forbidden()
+      return res.negotiate(err)
+    }
+  },
+
+  async getUser (req, res) {
+    try {
+      const userId = req.params['id']
+      const user = await User.findOne(userId).populate('comments').populate('topics')
+
+      if (user) return res.json(user)
+      return res.notFound()
+    } catch (err) {
       return res.negotiate(err)
     }
   }

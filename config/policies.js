@@ -45,6 +45,7 @@ module.exports.policies = {
 
   'UserController': {
     '*': false,
+    getUser: 'isAuthorized',
     facebook: true
   }
 

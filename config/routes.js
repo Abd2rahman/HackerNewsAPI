@@ -43,7 +43,8 @@ module.exports.routes = {
   'put /topic/:topicId': 'TopicController.upvoteTopic',
   'post /topic/:topicId/comment': 'TopicController.addComment',
   'post /auth/facebook': 'UserController.facebook',
-  'post /user': 'UserController.create'
+  'post /user': 'UserController.create',
+  'get  /user/:id': 'UserController.getUser'
 
   /***************************************************************************
   *                                                                          *
