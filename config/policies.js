@@ -43,7 +43,7 @@ module.exports.policies = {
     '*': false
   },
 
-  'UserComment': {
+  'UserController': {
     '*': false,
     facebook: true
   }

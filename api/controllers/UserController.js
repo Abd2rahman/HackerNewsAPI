@@ -10,30 +10,24 @@ module.exports = {
 
   async facebook (req, res) {
     const { accessToken } = req.body
-    if (!accessToken) return res.forbidden()
+    if (!accessToken) return res.badRequest()
     try {
-      const userProfil = await FB.api('me', { fields: ['id', 'name', 'email'], accessToken })
+      const userProfil = await FB.api('me', { fields: ['id', 'name'], access_token: accessToken })
       const facebookId = userProfil.id
 
-      if (!facebookId) return res.forbidden()
+      let user = await User.findOne({ facebookId })
 
-      const user = await User.findOne({ facebookId })
       if (!user) {
         const username = userProfil.name
-        const createdUser = await User.create({ username, facebookId })
-        const payload = {
-          id: createdUser.id
-        }
-        const token = TokenService.sign(payload)
-        return res.json({ token })
-      } else {
-        const payload = {
-          id: user.id
-        }
-        const token = TokenService.sign(payload)
-        return res.json({ token })
+        user = await User.create({ username, facebookId })
       }
+      const payload = {
+        id: user.id
+      }
+      const token = TokenService.sign(payload)
+      return res.json({ token })
     } catch (err) {
+      if (err.response.error.code === 190) return res.forbidden()
       return res.negotiate(err)
     }
   }

@@ -8,21 +8,23 @@
 module.exports = {
 
   async displayRecentTopics (req, res) {
-    const { page } = req.query
+    const limit = req.query.limit || 1
 
     try {
-      const recentTopics = await Topic.find({ sort: 'createdAt ASC' }).paginate({ page, limit: 1 })
-      return res.json(recentTopics)
+      const sumOfTopics = await Topic.count()
+      const recentTopics = await Topic.find({ sort: 'createdAt DESC' }).paginate({ limit })
+      return res.json({ recentTopics, sumOfTopics })
     } catch (err) {
       return res.negotiate(err)
     }
   },
 
   async displayTopTopics (req, res) {
-    const { page } = req.query
+    const limit = req.query.limit || 1
     try {
-      const topTopics = await Topic.find({ sort: 'score DESC' }).paginate({ page, limit: 2 })
-      return res.json(topTopics)
+      const sumOfTopics = await Topic.count()
+      const topTopics = await Topic.find({ sort: 'score DESC' }).paginate({ limit })
+      return res.json({ topTopics, sumOfTopics })
     } catch (err) {
       return res.negotiate(err)
     }
@@ -33,6 +35,7 @@ module.exports = {
 
     try {
       const topic = await Topic.findOne(topicId).populate('comments')
+      if (!topic) return res.notFound()
       return res.json(topic)
     } catch (err) {
       return res.negotiate(err)
@@ -60,7 +63,7 @@ module.exports = {
     const user = req.options.user.id
     const by = req.options.user.username
     const { url, title } = req.body
-    const score = Math.floor(Math.random() * 5)
+    const score = Math.floor((Math.random() * 5) + 1)
 
     try {
       const topic = await Topic.create({ url, title, score, user, by })
